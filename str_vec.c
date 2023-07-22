@@ -53,3 +53,9 @@ str_vec_clear(str_vec_t* v)
 {
     v->count = 0;
 }
+
+void
+str_vec_destroy(str_vec_t* v)
+{
+    free(v->data);
+}

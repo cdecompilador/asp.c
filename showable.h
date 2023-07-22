@@ -22,3 +22,10 @@ void
 byte_vector_show(void* _self);
 showable
 byte_vector_showable(byte_vector_t* bv);
+
+/* hash_table impl */
+#include "hash_table.h"
+void
+s_hash_table_show(void* _self);
+showable
+s_hash_table_showable(string_hash_table* self);

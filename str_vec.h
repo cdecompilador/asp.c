@@ -28,4 +28,8 @@ str_vec_push(str_vec_t* bv, const char* buf);
 void
 str_vec_clear(str_vec_t* v);
 
+/* Frees the allocated bytes */
+void
+str_vec_destroy(str_vec_t* v);
+
 #endif

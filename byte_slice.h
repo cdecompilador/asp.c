@@ -1,6 +1,8 @@
 #ifndef BYTE_SLICE_H
 #define BYTE_SLICE_H
 
+#include "util.h"
+
 typedef struct {
     u8* buffer;
     usize buffer_size;
