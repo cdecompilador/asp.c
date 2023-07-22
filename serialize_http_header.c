@@ -22,7 +22,7 @@ http_header_serialize(void* _self, string_buffer* buf)
     string_buffer_push(buf, string_buffer_as_slice(&self->uri));
     
     /* Serialize HTTP version */
-    string_buffer_push_str(buf, " HTTP/1.0\r\n\r\n"); // <- tarmo pone \n\r
+    string_buffer_push_str(buf, " HTTP/1.0\r\n"); // <- tarmo pone \n\r
 
     /* Serialize HTTP headers */
     for (int i = 0; i < self->headers.table_size; i++) {

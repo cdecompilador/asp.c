@@ -13,5 +13,6 @@ clang -std=gnu2x -Wall -c http_body.c
 clang -std=gnu2x -Wall -c serialize_string_buffer.c
 clang -std=gnu2x -Wall -c serialize_http_header.c
 clang -std=gnu2x -Wall -c http_body_raw_text.c
+clang -std=gnu2x -Wall -c serialize_http_request.c
 
-clang main.o byte_vector.o showable.o str_vec.o result.o socket.o error.o net_error.o tcp.o string_buffer.o serialize.c http_body.o serialize_string_buffer.o serialize_http_header.o http_body_raw_text.o -o asp.c.exe
+clang main.o byte_vector.o showable.o str_vec.o result.o socket.o error.o net_error.o tcp.o string_buffer.o serialize.c http_body.o serialize_string_buffer.o serialize_http_header.o http_body_raw_text.o serialize_http_request.o -o asp.c.exe

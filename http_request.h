@@ -19,12 +19,8 @@ typedef struct {
 } http_header;
 
 typedef struct {
-    http_body_like body;
-} http_body;
-
-typedef struct {
     http_header header;
-    http_body body;
+    http_body_like body;
 } http_request;
 
 #endif
