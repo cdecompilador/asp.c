@@ -32,6 +32,9 @@ bvec_pop(byte_vector_t* bv);
 void 
 bvec_push(byte_vector_t* bv, u8 byte);
 
+void
+bvec_reserve(byte_vector_t* self, usize extra_size);
+
 /* Read and Writes, they don't need to be inside the interface BufferedRW.
  * The writes are done at the end of the buffer 
  */

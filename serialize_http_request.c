@@ -11,7 +11,7 @@ http_request_serialize(void* _self, string_buffer* buf)
     http_request* self = (http_request*)_self;
 
     /* Serialize header */
-    serializable ser_header = http_header_serializable(&self->header);
+    serializable ser_header = http_request_header_serializable(&self->header);
     CHECK(serialize(&ser_header, buf));
     string_buffer_push_str(buf, "Content-Type: ");
     string_buffer_push(buf, content_type(&self->body));

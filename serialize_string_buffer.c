@@ -1,11 +1,5 @@
 #include "serialize_string_buffer.h"
 
-void
-string_buffer_destroy(string_buffer* self)
-{
-    bvec_destroy(&self->byte_vector);
-}
-
 result_void
 string_buffer_serialize(void* _self, string_buffer* buf)
 {

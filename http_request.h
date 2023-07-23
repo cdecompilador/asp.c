@@ -16,10 +16,10 @@ typedef struct {
     enum http_method method;
     string_buffer uri;
     string_hash_table headers;
-} http_header;
+} http_request_header;
 
 typedef struct {
-    http_header header;
+    http_request_header header;
     http_body_like body;
 } http_request;
 

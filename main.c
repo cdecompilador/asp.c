@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h>    
 
 #include "result.h"
 #include "util.h"
@@ -12,13 +12,15 @@
 #include "http_request.h"
 #include "serialize.h"
 #include "serialize_http_request.h"
+#include "http_response.h"
 
 int
 main(int argc, char** argv)
 {
     backtrace_init();
 
-    http_header header;
+    /*
+    http_request_header header;
     header.method = POST;
     header.uri = string_buffer_create("/usr/data");
 
@@ -42,10 +44,19 @@ main(int argc, char** argv)
     string_buffer buf = string_buffer_empty();
     serializable s = http_request_serializable(&request);
     UNWRAP(serialize(&s, &buf));
+    */ 
+
+    string_buffer buf = string_buffer_create("Hello");
+    enum http_status_code status_code = OK;
+    string_buffer_push_format(
+            &buf,
+            "HTTP/1.0 %d %s\r\n",   
+            status_code, 
+            status_code_message(status_code));
 
     printf("%.*s\n", buf.byte_vector.count, buf.byte_vector.data);
 
-    /*
+    /* 
     tcp_stream stream = UNWRAP(
         tcp_stream_connect(
             ipv4_from(

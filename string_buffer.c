@@ -1,5 +1,7 @@
 #include "string_buffer.h"
 
+#include <stdarg.h>
+
 string_buffer
 string_buffer_empty()
 {
@@ -67,3 +69,31 @@ string_buffer_to_byte_slice(string_buffer* self)
         .buffer_size = sb.len
     };
 }
+
+void
+string_buffer_push_format(string_buffer* self, const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+
+    u8* buf_ptr = self->byte_vector.data + self->byte_vector.count;
+
+    bvec_reserve(&self->byte_vector, 64);
+    int len = vsnprintf((char*)buf_ptr, 64, format, args);
+
+    if (len < 0) {
+        fprintf(stderr, "Error");
+        exit(1);
+    }
+
+    self->byte_vector.count += len;
+
+    va_end(args);
+}
+
+void
+string_buffer_destroy(string_buffer* self)
+{
+    bvec_destroy(&self->byte_vector);
+}
+

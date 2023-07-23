@@ -87,6 +87,9 @@ byte_slice
 string_buffer_to_byte_slice(string_buffer* self);
 
 void
+string_buffer_push_format(string_buffer* self, const char* format, ...);
+
+void
 string_buffer_destroy(string_buffer* self);
 
 #endif

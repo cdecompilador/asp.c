@@ -69,6 +69,18 @@ bvec_push(byte_vector_t* bv, u8 byte)
 }
 
 void
+bvec_reserve(byte_vector_t* self, usize extra_size)
+{
+    self->cap += extra_size;
+    u8* data = realloc(self->data, self->cap);
+
+    if (data == NULL) {
+        fprintf(stderr, "Error: failed to reallocate on reserve on byte_vector_t\n");
+        exit(1);
+    }
+}
+
+void
 bvec_write_from(byte_vector_t* bv, const u8* buffer, usize buffer_size)
 {
     /* Realloc until the data buffer is big enough */
