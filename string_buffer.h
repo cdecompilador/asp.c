@@ -50,6 +50,37 @@ string_view_slice(const string_view* sv, usize start, usize end)
     );
 }
 
+inline bool
+string_view_starts_with(string_view self, string_view other)
+{
+    if (self.len < other.len) {
+        return false;
+    }
+
+    for (usize i = 0; i < other.len; i++) {
+        if (*(self.ptr + i) != *(other.ptr + i)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+inline result_void
+string_view_partition_at(string_view self, usize i, 
+                         string_view* result, string_view* remainder)
+{
+    if (i > self.len) {
+        return ERR(result_void, 
+                   message_error("Attempted to partition_at with invalid index"));
+    }
+
+    *result = (string_view) { .ptr = self.ptr, .len = i };
+    *remainder = (string_view) { .ptr = self.ptr + i + 1, .len = self.len - i };
+
+    return OK(result_void, NULL);
+}
+
 typedef struct {
     byte_vector_t byte_vector;
 } string_buffer;

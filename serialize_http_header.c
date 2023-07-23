@@ -52,6 +52,21 @@ http_request_header_serializable(http_request_header* self)
     };
 }
 
+/* TODO
+result_void
+http_request_header_deserialize(string_buffer* buf, void* _self)
+{
+    http_request_header* self = (http_request_header*)_self;
+
+
+}
+
+deserializable
+http_request_header_deserializable(string_buffer* buf)
+{
+}
+*/
+
 result_void
 http_response_header_serialize(void* _self, string_buffer* buf)
 {

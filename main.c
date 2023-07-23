@@ -13,6 +13,7 @@
 #include "serialize.h"
 #include "serialize_http_request.h"
 #include "http_response.h"
+#include "parser_combinators.h"
 
 int
 main(int argc, char** argv)
@@ -46,6 +47,7 @@ main(int argc, char** argv)
     UNWRAP(serialize(&s, &buf));
     */ 
 
+    /*
     string_buffer buf = string_buffer_create("Hello");
     enum http_status_code status_code = OK;
     string_buffer_push_format(
@@ -53,8 +55,22 @@ main(int argc, char** argv)
             "HTTP/1.0 %d %s\r\n",   
             status_code, 
             status_code_message(status_code));
-
     printf("%.*s\n", buf.byte_vector.count, buf.byte_vector.data);
+    */
+
+    string_buffer buf = string_buffer_create("POST");
+    string_view buf_view = string_buffer_as_slice(&buf);
+
+    combinator post_parser = match("POST");
+    combinator get_parser  = match("GET");
+    combinator method_parser = either(get_parser, post_parser);
+    parse_result result = parse(method_parser, buf_view);
+
+    if (result.success) {
+        puts("Parse success");
+    } else {
+        puts("Parse failed");
+    }
 
     /* 
     tcp_stream stream = UNWRAP(
