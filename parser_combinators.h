@@ -68,6 +68,9 @@ match_combinator_parse(void* _self, parse_state input)
 
         UNWRAP((string_view_partition_at(input_str, self->to_match.len, &result, &remainder)));
 
+        printf("result %d = %.*s\n", result.len, result.len, result.ptr);
+        printf("remainder %d = %.*s\n", result.len, remainder.len, remainder.ptr);
+
         return (parse_state) {
             .input_str = remainder,
             .result = OK(parse_result, ((void*)&result))
@@ -144,6 +147,68 @@ either(combinator c1, combinator c2)
     return (combinator) {
         .self = (void*)instance,
         .vtable = either_combinator_vtable
+    };
+}
+
+typedef struct {
+    combinator c1;
+    combinator c2;
+} pair_combinator;
+
+typedef struct {
+    void* left;
+    void* right;
+} pair_result;
+
+inline parse_state 
+pair_combinator_parse(void* _self, parse_state input)
+{
+   pair_combinator* self = (pair_combinator*)_self;
+
+   parse_state err_res = (parse_state) {
+        .input_str = input.input_str,
+        .result = ERR(parse_result, message_error("Failed on either combinator"))
+    };
+
+    parse_state c1_state = _parse(self->c1, input);
+    if (!c1_state.result.success)
+        return err_res;
+
+    parse_state c2_state = _parse(self->c2, c1_state);
+    if (!c2_state.result.success)
+        return err_res;
+
+    pair_result* result = (pair_result*)malloc(sizeof(pair_result));
+    *result = (pair_result) { 
+        .left = c1_state.result.value, 
+        .right = c2_state.result.value
+    };
+
+    return (parse_state) {
+        .input_str = c2_state.input_str,
+        .result = OK(parse_result, (void*)result)
+    };
+}
+
+inline combinator
+pair(combinator c1, combinator c2)
+{
+    pair_combinator* instance = (pair_combinator*)malloc(sizeof(either_combinator));
+    if (instance == NULL) {
+        fprintf(stderr, "Allocation failed");
+        exit(1);
+    }
+
+    instance->c1 = c1;
+    instance->c2 = c2;
+
+    Parser pair_combinator_vtable = (Parser) {
+        .parse = pair_combinator_parse,
+    };
+
+    return (combinator) {
+        .self = (void*)instance,
+        .vtable = pair_combinator_vtable
     };
 }
 

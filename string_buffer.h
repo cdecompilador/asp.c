@@ -76,7 +76,7 @@ string_view_partition_at(string_view self, usize i,
     }
 
     *result = (string_view) { .ptr = self.ptr, .len = i };
-    *remainder = (string_view) { .ptr = self.ptr + i + 1, .len = self.len - i };
+    *remainder = (string_view) { .ptr = self.ptr + i, .len = self.len - i };
 
     return OK(result_void, NULL);
 }

@@ -58,13 +58,16 @@ main(int argc, char** argv)
     printf("%.*s\n", buf.byte_vector.count, buf.byte_vector.data);
     */
 
-    string_buffer buf = string_buffer_create("POST");
+    string_buffer buf = string_buffer_create("GET ");
     string_view buf_view = string_buffer_as_slice(&buf);
 
+    combinator space_parser = match(" ");
     combinator post_parser = match("POST");
     combinator get_parser  = match("GET");
-    combinator method_parser = either(get_parser, post_parser);
-    parse_result result = parse(method_parser, buf_view);
+    combinator create_parser = match("CREATE");
+    combinator method_parser = either(create_parser, either(get_parser, post_parser));
+    combinator final_parser = pair(method_parser, space_parser);
+    parse_result result = parse(final_parser, buf_view);
 
     if (result.success) {
         puts("Parse success");
