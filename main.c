@@ -66,10 +66,10 @@ main(int argc, char** argv)
     combinator get_parser  = match("GET");
     combinator create_parser = match("CREATE");
     combinator method_parser = either(create_parser, either(get_parser, post_parser));
-    combinator final_parser = pair(method_parser, space_parser);
+    combinator final_parser = left(method_parser, space_parser);
     parse_result result = parse(final_parser, buf_view);
 
-    if (result.success) {
+    if (result.success && result.value == NULL) {
         puts("Parse success");
     } else {
         puts("Parse failed");

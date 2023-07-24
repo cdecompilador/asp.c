@@ -68,12 +68,9 @@ match_combinator_parse(void* _self, parse_state input)
 
         UNWRAP((string_view_partition_at(input_str, self->to_match.len, &result, &remainder)));
 
-        printf("result %d = %.*s\n", result.len, result.len, result.ptr);
-        printf("remainder %d = %.*s\n", result.len, remainder.len, remainder.ptr);
-
         return (parse_state) {
             .input_str = remainder,
-            .result = OK(parse_result, ((void*)&result))
+            .result = OK(parse_result, NULL)
         };
     } else {
         return (parse_state) {
@@ -210,6 +207,84 @@ pair(combinator c1, combinator c2)
         .self = (void*)instance,
         .vtable = pair_combinator_vtable
     };
+}
+
+typedef struct {
+    combinator c;
+
+    /* This would have to take care of freeing the old value */
+    void* (*map_fn)(void*);
+} map_combinator;
+
+inline parse_state
+map_combinator_parse(void* _self, parse_state input)
+{
+    map_combinator* self = (map_combinator*)_self;
+
+    parse_state new_state = _parse(self->c, input);
+
+    if (new_state.result.success) {
+        void* new_result_value = self->map_fn(new_state.result.value);
+        new_state.result.value = new_result_value;
+
+        return new_state;
+    } else {
+        return new_state;
+    }
+}
+
+inline combinator
+map(combinator c, void* (*map_fn)(void*))
+{
+    map_combinator* instance = (map_combinator*)malloc(sizeof(map_combinator));
+    if (instance == NULL) {
+        fprintf(stderr, "Allocation failed");
+        exit(1);
+    }
+
+    instance->map_fn = map_fn;
+    instance->c = c;
+
+    Parser map_combinator_vtable = (Parser) {
+        .parse = map_combinator_parse
+    };
+
+    return (combinator) {
+        .self = (void*)instance,
+        .vtable = map_combinator_vtable
+    };
+}
+
+void*
+take_left_pair_result(void* _self)
+{
+    pair_result* self = (pair_result*)_self;
+
+    if (self->right) free(self->right);
+
+    return self->left;
+}
+
+void*
+take_right_pair_result(void* _self)
+{
+    pair_result* self = (pair_result*)_self;
+
+    if (self->left) free(self->left);
+
+    return self->right;
+}
+
+inline combinator
+left(combinator c1, combinator c2)
+{
+    return map(pair(c1, c2), take_left_pair_result);
+}
+
+inline combinator
+right(combinator c1, combinator c2)
+{
+    return map(pair(c1, c2), take_right_pair_result);
 }
 
 /*
