@@ -63,8 +63,7 @@ async def get_cc_deps(in_c_file):
     cmd = "clang %s -M %s" % (CFLAGS, in_c_file)
 
     p = await asyncio.create_subprocess_exec(*shlex.split(cmd, posix=False), 
-                                             stdout=subprocess.PIPE,
-                                             stderr=subprocess.PIPE)
+                                             stdout=subprocess.PIPE)
     stdout, _ = await p.communicate()
 
     stdout = stdout.decode().split(": ")[1]
@@ -114,7 +113,7 @@ async def main():
                     needs_link.set()
                     await cc(file, obj)
         except:
-            pass
+           pass
     
     for file in c_files:
         task = asyncio.create_task(file_worker(file))
@@ -122,7 +121,7 @@ async def main():
 
     await asyncio.gather(*tasks)
 
-    if needs_link.is_set():
+    if needs_link.is_set() or not os.path.exists(EXECUTABLE_NAME):
         await link(objs, EXECUTABLE_NAME)
 
 if __name__ == "__main__":

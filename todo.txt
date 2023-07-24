@@ -1,0 +1,4 @@
+[] remove all fprintf(stderr) + exit for a panic system that stack traces the tracking functions
+[] add deserialization
+[] add parser combinators library
+[] improve code style consistency and make a style guidelines

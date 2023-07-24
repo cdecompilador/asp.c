@@ -5,7 +5,7 @@
 
 #include "ip.h"
 #include "string_buffer.h"
-#include "byte_slice.h"
+#include "vector.h"
 #include "tcp.h"
 #include "hash_table.h"
 #include "showable.h"
@@ -58,7 +58,7 @@ main(int argc, char** argv)
     printf("%.*s\n", buf.byte_vector.count, buf.byte_vector.data);
     */
 
-    string_buffer buf = string_buffer_create("GET ");
+    string_buffer buf = string_buffer_create("GET POST ");
     string_view buf_view = string_buffer_as_slice(&buf);
 
     combinator space_parser = match(" ");
@@ -67,9 +67,11 @@ main(int argc, char** argv)
     combinator create_parser = match("CREATE");
     combinator method_parser = either(create_parser, either(get_parser, post_parser));
     combinator final_parser = left(method_parser, space_parser);
-    parse_result result = parse(final_parser, buf_view);
+    combinator final_parsers = sequence(2, final_parser, final_parser);
+    parse_result result = parse(final_parsers, buf_view);
+    abstract_vector vec = *(abstract_vector*)result.value;
 
-    if (result.success && result.value == NULL) {
+    if (result.success && vec.count == 2) {
         puts("Parse success");
     } else {
         puts("Parse failed");

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "util.h"
 #include "result.h"
@@ -285,6 +286,82 @@ inline combinator
 right(combinator c1, combinator c2)
 {
     return map(pair(c1, c2), take_right_pair_result);
+}
+
+typedef struct {
+    abstract_vector combinators;
+} sequence_combinator;
+
+inline parse_state
+sequence_combinator_parse(void* _self, parse_state input)
+{
+    abstract_vector* results;
+    sequence_combinator* self;
+    parse_state state;
+
+    self = (sequence_combinator*)_self;
+    state = input;
+    results = (abstract_vector*)malloc(sizeof(abstract_vector));
+    *results = abstract_vector_create(sizeof(void*));
+
+
+    for (int i = 0; i < self->combinators.count; i++) {
+        combinator c = *(combinator*)abstract_vector_index(&self->combinators, i);
+        state = _parse(c, state);
+
+        if (!state.result.success) {
+            return (parse_state) {
+                .input_str = input.input_str,
+                .result = ERR(parse_result, message_error("Failed on sequence combinator"))
+            };
+        }
+        
+        abstract_vector_push(results, state.result.value);
+    }
+
+    state.result.value = (void*)results;
+
+    return state;
+}
+
+inline combinator
+sequence(usize arg_count, ...)
+{
+    /* Extract from variadic arguments the combinators and push them to an 
+     * abstract vector */
+    abstract_vector combinators;
+    va_list args;
+
+    va_start(args, arg_count);
+    combinators = abstract_vector_create(sizeof(combinator));
+
+    for (int i = 0; i < arg_count; i++) {
+        combinator c = va_arg(args, combinator);
+        abstract_vector_push(&combinators, (void*)&c);
+    }
+
+    va_end(args);
+
+    /* Create the heap instance of the combinator */
+    sequence_combinator* instance;
+    Parser sequence_combinator_vtable;
+
+    instance = (sequence_combinator*)malloc(sizeof(sequence_combinator));
+    if (instance == NULL) {
+        fprintf(stderr, "Allocation failed");
+        exit(1);
+    }
+
+    instance->combinators = combinators;
+
+    sequence_combinator_vtable = (Parser) {
+        .parse = sequence_combinator_parse
+    };
+
+    return (combinator) {
+        .self = (void*)instance,
+        .vtable = sequence_combinator_vtable
+    };
 }
 
 /*

@@ -17,7 +17,7 @@ show(showable* s)
 }
 
 /* byte_vector_t impl */
-#include "byte_vector.h"
+#include "vector.h"
 void 
 byte_vector_show(void* _self);
 showable

@@ -5,8 +5,7 @@
 
 #include "util.h"
 #include "result.h"
-#include "byte_vector.h"
-#include "byte_slice.h"
+#include "vector.h"
 
 typedef struct {
     const char* ptr;

@@ -4,7 +4,7 @@
 #include "result.h"
 #include "error.h"
 #include "socket.h"
-#include "byte_slice.h"
+#include "vector.h"
 
 typedef struct {
     tcp_socket socket;
