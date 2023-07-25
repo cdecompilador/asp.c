@@ -58,7 +58,7 @@ main(int argc, char** argv)
     printf("%.*s\n", buf.byte_vector.count, buf.byte_vector.data);
     */
 
-    string_buffer buf = string_buffer_create("GET POST ");
+    string_buffer buf = string_buffer_create("   A");
     string_view buf_view = string_buffer_as_slice(&buf);
 
     combinator space_parser = match(" ");
@@ -66,12 +66,12 @@ main(int argc, char** argv)
     combinator get_parser  = match("GET");
     combinator create_parser = match("CREATE");
     combinator method_parser = either(create_parser, either(get_parser, post_parser));
-    combinator final_parser = left(method_parser, space_parser);
-    combinator final_parsers = sequence(2, final_parser, final_parser);
-    parse_result result = parse(final_parsers, buf_view);
-    abstract_vector vec = *(abstract_vector*)result.value;
+    combinator final_parser = sequence(2, zero_or_more(space_parser), match("A"));
+    // combinator final_parsers = sequence(3, final_parser, final_parser, zero_or_more(space_parser));
+    parse_result result = parse(final_parser, buf_view);
+    // abstract_vector vec = *(abstract_vector*)result.value;
 
-    if (result.success && vec.count == 2) {
+    if (result.success) {
         puts("Parse success");
     } else {
         puts("Parse failed");

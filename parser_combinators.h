@@ -304,7 +304,6 @@ sequence_combinator_parse(void* _self, parse_state input)
     results = (abstract_vector*)malloc(sizeof(abstract_vector));
     *results = abstract_vector_create(sizeof(void*));
 
-
     for (int i = 0; i < self->combinators.count; i++) {
         combinator c = *(combinator*)abstract_vector_index(&self->combinators, i);
         state = _parse(c, state);
@@ -316,7 +315,7 @@ sequence_combinator_parse(void* _self, parse_state input)
             };
         }
         
-        abstract_vector_push(results, state.result.value);
+        abstract_vector_push(results, (void*)(void**)&state.result.value);
     }
 
     state.result.value = (void*)results;
@@ -337,7 +336,7 @@ sequence(usize arg_count, ...)
 
     for (int i = 0; i < arg_count; i++) {
         combinator c = va_arg(args, combinator);
-        abstract_vector_push(&combinators, (void*)&c);
+        abstract_vector_push(&combinators, (void*)(void**)&c);
     }
 
     va_end(args);
@@ -361,6 +360,60 @@ sequence(usize arg_count, ...)
     return (combinator) {
         .self = (void*)instance,
         .vtable = sequence_combinator_vtable
+    };
+}
+
+typedef struct {
+    combinator c;
+} zero_or_more_combinator;
+
+inline parse_state
+zero_or_more_combinator_parse(void* _self, parse_state input)
+{
+    zero_or_more_combinator* self;
+    abstract_vector* results;
+    parse_state state;
+
+    self = (zero_or_more_combinator*)_self;
+    state = input;
+    results = (abstract_vector*)malloc(sizeof(abstract_vector));
+    *results = abstract_vector_create(sizeof(void*));
+
+    /* Apply the same combinator until it fails */
+    while (true) {
+        state = _parse(self->c, state);
+
+        if (!state.result.success) {
+            break;
+        }
+
+        abstract_vector_push(results, (void*)(void**)&state.result.value);
+    }
+
+    state.result.success = true;
+    state.result.value = (void*)results;
+
+    return state;
+}
+
+inline combinator
+zero_or_more(combinator c)
+{
+    /* Create the heap instance of the combinator */
+    zero_or_more_combinator* instance;
+    Parser zero_or_more_combinator_vtable;
+
+    instance = (zero_or_more_combinator*)malloc(sizeof(zero_or_more_combinator));
+
+    instance->c = c;
+
+    zero_or_more_combinator_vtable = (Parser) {
+        .parse = zero_or_more_combinator_parse
+    };
+
+    return (combinator) {
+        .self = (void*)instance,
+        .vtable = zero_or_more_combinator_vtable
     };
 }
 
