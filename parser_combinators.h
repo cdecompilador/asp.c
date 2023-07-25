@@ -64,14 +64,15 @@ match_combinator_parse(void* _self, parse_state input)
     string_view input_str = input.input_str;
 
     if (string_view_starts_with(input_str, self->to_match)) {
-        string_view result;
+        string_view* result;
         string_view remainder;
 
-        UNWRAP((string_view_partition_at(input_str, self->to_match.len, &result, &remainder)));
+        result = (string_view*)malloc(sizeof(string_view));
+        UNWRAP((string_view_partition_at(input_str, self->to_match.len, result, &remainder)));
 
         return (parse_state) {
             .input_str = remainder,
-            .result = OK(parse_result, NULL)
+            .result = OK(parse_result, result)
         };
     } else {
         return (parse_state) {

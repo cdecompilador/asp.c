@@ -13,7 +13,30 @@
 #include "serialize.h"
 #include "serialize_http_request.h"
 #include "http_response.h"
+#include "http_request.h"
 #include "parser_combinators.h"
+
+void*
+map_str_to_method(void* _input)
+{
+    enum http_method* method;
+    string_view* input;
+
+    input = (string_view*)_input;
+    method = (enum http_method*)malloc(sizeof(enum http_method));
+
+    if (string_view_starts_with(*input, string_view_from("GET"))) {
+        *method = GET;
+    } else if (string_view_starts_with(*input, string_view_from("POST"))) {
+        *method = POST;
+    } else if (string_view_starts_with(*input, string_view_from("HEAD"))) {
+        *method = HEAD;
+    }
+
+    free(input);
+
+    return method;
+}
 
 int
 main(int argc, char** argv)
@@ -58,20 +81,25 @@ main(int argc, char** argv)
     printf("%.*s\n", buf.byte_vector.count, buf.byte_vector.data);
     */
 
-    string_buffer buf = string_buffer_create("   A");
+    string_buffer buf = string_buffer_create("HEAD");
     string_view buf_view = string_buffer_as_slice(&buf);
 
     combinator space_parser = match(" ");
-    combinator post_parser = match("POST");
-    combinator get_parser  = match("GET");
-    combinator create_parser = match("CREATE");
-    combinator method_parser = either(create_parser, either(get_parser, post_parser));
+
+    combinator method_parser = map(
+        either(
+            either(match("POST"), match("GET")),
+            match("HEAD")
+        ),
+        map_str_to_method
+    );
+
     combinator final_parser = sequence(2, zero_or_more(space_parser), match("A"));
     // combinator final_parsers = sequence(3, final_parser, final_parser, zero_or_more(space_parser));
-    parse_result result = parse(final_parser, buf_view);
+    parse_result result = parse(method_parser, buf_view);
     // abstract_vector vec = *(abstract_vector*)result.value;
 
-    if (result.success) {
+    if (result.success && *(enum http_method*)result.value == HEAD) {
         puts("Parse success");
     } else {
         puts("Parse failed");
